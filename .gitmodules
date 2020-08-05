@@ -1,0 +1,3 @@
+[submodule "modules/gsplines"]
+	path = modules/gsplines
+	url = git@github.com:rafaelrojasmiliani/gsplines.git

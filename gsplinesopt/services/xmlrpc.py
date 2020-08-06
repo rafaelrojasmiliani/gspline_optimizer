@@ -13,6 +13,7 @@ except ImportError:  # Python 3.X
     from xmlrpc.server import SimpleXMLRPCRequestHandler
     from socketserver import ThreadingMixIn
 
+from ..ipopt.optpath import minimumjerkpath
 import json
 import numpy as np
 import math
@@ -21,8 +22,8 @@ import sys
 import time
 import traceback
 import time
-import gsplines
 import abc
+from gsplines.services import piecewise2json
 
 
 def debug_response(function):
@@ -73,7 +74,7 @@ class cGplinesOptXMLRPCServer(object):
         self.server_.shutdown()
         self.server_.socket.close()
 
-    def gsplines_optimal_trajectory(self, _jsonreq):
+    def gsplines_minimum_jerk(self, _jsonreq):
         ''' Generates desired trajectory'''
         json_dict = json.loads(_jsonreq)
         wp = np.array(json_dict['waypoints'])
@@ -83,4 +84,21 @@ class cGplinesOptXMLRPCServer(object):
         qd_max = json_dict['maximum_speed']
         qdd_max = json_dict['maximum_acceleration']
         min_T = json_dict['execution_time']
+
+        q = minimumjerkpath(wp)
+
+        TN = q.T_
+        tspan = np.arange(0.0, TN, TN/1000)
+
+        pd_max = np.linalg.norm(q.deriv()(tspan), ord=np.inf)
+        pdd_max  = np.linalg.norm(q.deriv(2)(tspan), ord=np.inf)
+        Tv = pd_max / qd_max * TN
+        Ta = np.sqrt(pdd_max / qdd_max) * TN
+        Topt = min([max([Tv, Ta]), min_T])
+
+        q = q.linear_scaling_new_execution_time(Topt)
+
+        return piecewise2json(q)
+
+
 

@@ -4,8 +4,6 @@ import numpy as np
 
 from constraints.constraintscontainer import cCostraintsContainer
 from constraints.constraints import cAffineBilateralConstraint
-from dangerfield.constraint import cConstraintDF
-from dangerfield.constraint import cConstraintVel
 
 
 class cIpoptInterface(cCostraintsContainer):

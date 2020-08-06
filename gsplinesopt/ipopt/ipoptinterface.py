@@ -2,21 +2,21 @@ import ipopt
 import numpy as np
 # np.set_printoptions(threshold=np.nan,linewidth=500,precision=3,suppress=True)
 
-from constraints.constraintscontainer import cCostraintsContainer
-from constraints.constraints import cAffineBilateralConstraint
+from .constraints.constraintscontainer import cCostraintsContainer
+from .constraints.constraints import cAffineBilateralConstraint
 
 
 class cIpoptInterface(cCostraintsContainer):
     def __init__(self, _cost):
         self.cost_ = _cost
-        self.T_ = _cost.T_
         self.n_ = _cost.wp_.shape[0] - 1
+        self.T_ = self.n_
         super(cIpoptInterface, self).__init__(_n=self.n_)
 
         self.finiteTimeConstraint_ =\
             cAffineBilateralConstraint(
                 A=np.array([[1.0 for i in range(0, self.n_)]]),
-                b=np.array([-_cost.T_]))
+                b=np.array([-self.T_]))
 
         self.append(self.finiteTimeConstraint_)
 
@@ -70,7 +70,7 @@ class cIpoptInterface(cCostraintsContainer):
         nlp.addOption(b'hessian_approximation', b'limited-memory')
         nlp.addOption(b'jac_c_constant', b'yes')
 
-        x0 = self.cost_.getFirstGuess()
+        x0 = self.cost_.get_first_guess()
         return nlp.solve(x0)
 
 
@@ -161,7 +161,7 @@ class cIpoptInterface_2(cCostraintsContainer):
         nlp.addOption(b'jac_c_constant', b'yes')
         # print(self.constraints(self.x0))
 
-        x0 = self.cost_.getFirstGuess()
+        x0 = self.cost_.get_first_guess()
         return nlp.solve(x0)
       
 class cIpoptInterface_3(cCostraintsContainer):
@@ -229,5 +229,5 @@ class cIpoptInterface_3(cCostraintsContainer):
         nlp.addOption(b'jac_c_constant', b'yes')
         # print(self.constraints(self.x0))
 
-        x0 = self.cost_.getFirstGuess()
+        x0 = self.cost_.get_first_guess()
         return nlp.solve(x0)

@@ -7,4 +7,5 @@ def minimumjerkpath(_wp):
     basis = cBasis0010()
     cost = cJerkL2Norm(_wp, basis)
     ipopt = cIpoptInterface(cost)
+    ipopt.solve()
 

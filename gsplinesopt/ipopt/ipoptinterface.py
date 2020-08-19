@@ -7,10 +7,10 @@ from .constraints.constraints import cAffineBilateralConstraint
 
 
 class cIpoptInterface(cCostraintsContainer):
-    def __init__(self, _cost):
+    def __init__(self, _cost, _execution_time):
         self.cost_ = _cost
         self.n_ = _cost.wp_.shape[0] - 1
-        self.T_ = self.n_
+        self.T_ = _execution_time
         super(cIpoptInterface, self).__init__(_n=self.n_)
 
         self.finiteTimeConstraint_ =\

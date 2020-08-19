@@ -1,8 +1,10 @@
 from .ipoptinterface import cIpoptInterface
 from gsplines.basis import cBasis0010
+from gsplines.basis import cBasis1010
 from gsplines.functionals import cJerkL2Norm
-from gsplines.functionals import cConvexCombinationL2Norm
+from gsplines.functionals.cost1010 import cCost1010
 from gsplines.interpolator import interpolate
+import numpy as np
 
 
 def minimum_jerk_path(_wp):
@@ -26,7 +28,7 @@ def minimum_weighed_speed_jerk_path(_wp, _k):
     k4 = np.power(_k, 4)
     alpha = k4 / (1.0 + k4)
     basis = cBasis1010(alpha)
-    cost = cConvexCombinationL2Norm(_wp, basis, 1, 3, alpha)
+    cost = cCost1010(_wp, alpha)
     ipopt = cIpoptInterface(cost, execution_time)
     tauv, info = ipopt.solve()
 

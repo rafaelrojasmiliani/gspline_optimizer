@@ -86,7 +86,7 @@ class cGplinesOptXMLRPCServer(object):
         qdd_max = json_dict['maximum_acceleration']
         min_T = json_dict['execution_time']
 
-        q = minimumjerkpath(wp)
+        q = minimum_jerk_path(wp)
 
         TN = q.T_
         tspan = np.arange(0.0, TN, TN/1000)

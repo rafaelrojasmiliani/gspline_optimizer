@@ -54,19 +54,19 @@ class cGplinesOptXMLRPCServer(object):
         class RequestHandler(SimpleXMLRPCRequestHandler):
             rpc_paths = (_service_path, )
 
-        server = SimpleXMLRPCServer(('0.0.0.0', _port),
-            requestHandler = RequestHandler,
-            logRequests = False,
-            allow_none = True)
+        server = SimpleXMLRPCServer(
+            ('0.0.0.0', _port),
+            requestHandler=RequestHandler,
+            logRequests=False,
+            allow_none=True)
         server.register_instance(self)
 
         self.server_ = server
-        self.trajectories={}
-        self.trajectories_deriv_={}
-        self.follower=None
-        self.kp_=0.001
-        self.kacc_=10000
-
+        self.trajectories = {}
+        self.trajectories_deriv_ = {}
+        self.follower = None
+        self.kp_ = 0.001
+        self.kacc_ = 10000
 
     def serve_forever(self):
         self.server_.serve_forever()
@@ -81,7 +81,7 @@ class cGplinesOptXMLRPCServer(object):
         wp = np.array(json_dict['waypoints'])
         N = wp.shape[0] - 1
         dim = wp.shape[1]
-        
+
         qd_max = json_dict['maximum_speed']
         qdd_max = json_dict['maximum_acceleration']
         min_T = json_dict['execution_time']
@@ -89,10 +89,10 @@ class cGplinesOptXMLRPCServer(object):
         q = minimum_jerk_path(wp)
 
         TN = q.T_
-        tspan = np.arange(0.0, TN, TN/1000)
+        tspan = np.arange(0.0, TN, TN / 1000)
 
         pd_max = np.linalg.norm(q.deriv()(tspan), ord=np.inf)
-        pdd_max  = np.linalg.norm(q.deriv(2)(tspan), ord=np.inf)
+        pdd_max = np.linalg.norm(q.deriv(2)(tspan), ord=np.inf)
         Tv = pd_max / qd_max * TN
         Ta = np.sqrt(pdd_max / qdd_max) * TN
         Topt = min([max([Tv, Ta]), min_T])
@@ -100,7 +100,6 @@ class cGplinesOptXMLRPCServer(object):
         q = q.linear_scaling_new_execution_time(Topt)
 
         return piecewise2json(q)
-
 
     def gsplines_minimum_weighed_speed_jerk(self, _jsonreq):
         ''' Generates desired trajectory'''
@@ -108,19 +107,19 @@ class cGplinesOptXMLRPCServer(object):
         wp = np.array(json_dict['waypoints'])
         N = wp.shape[0] - 1
         dim = wp.shape[1]
-        
+
         qd_max = json_dict['maximum_speed']
         qdd_max = json_dict['maximum_acceleration']
         min_T = json_dict['execution_time']
         k = json_dict['shape_factor']
 
-        q = weighedspeedjerkpath(wp, k)
+        q = minimum_weighed_speed_jerk_path(wp, k)
 
         TN = q.T_
-        tspan = np.arange(0.0, TN, TN/1000)
+        tspan = np.arange(0.0, TN, TN / 1000)
 
         pd_max = np.linalg.norm(q.deriv()(tspan), ord=np.inf)
-        pdd_max  = np.linalg.norm(q.deriv(2)(tspan), ord=np.inf)
+        pdd_max = np.linalg.norm(q.deriv(2)(tspan), ord=np.inf)
         Tv = pd_max / qd_max * TN
         Ta = np.sqrt(pdd_max / qdd_max) * TN
         Topt = min([max([Tv, Ta]), min_T])
@@ -128,4 +127,3 @@ class cGplinesOptXMLRPCServer(object):
         q = q.linear_scaling_new_execution_time(Topt)
 
         return piecewise2json(q)
-

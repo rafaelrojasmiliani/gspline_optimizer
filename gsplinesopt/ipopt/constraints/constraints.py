@@ -154,6 +154,42 @@ class cAffineBilateralConstraint(cBilateralConstraint):
         pass
 
 
+class cAffineUnilateralLowerConstraint(cUnilateralLowerConstraint):
+    """
+        Class for a linear bilateral constraint
+        as
+            Ax +b = 0
+    """
+
+    def __init__(self, **kwargs):
+        """
+          Paramenters
+          -----------
+          A: numpy.array nxn
+            Matrix of the defintion of the linear constrait
+          b: numpy.array n
+            vector of the definition
+        """
+        self.A = kwargs['A']
+        self.b = kwargs['b']
+        assert (self.A.shape[0] == self.b.shape[0])
+        kwargs['len_'] = self.A.shape[0]
+        super(cAffineUnilateralLowerConstraint, self).__init__(**kwargs)
+
+    def value(self, x, res):
+        res[:] = self.A.dot(x) + self.b
+
+    def diff_1(self, x, res):
+        res[:, :] = self.A
+
+    def diff_2(self, idx, x, res):
+        pass
+
+    def diff_2_contraction(self, x, lam, res):
+        # self.res.fill(0.0)
+        pass
+
+
 class cQuadraticScalarBilateralConstraint(cBilateralConstraint):
     """
         Class for a linear bilateral constraint
@@ -184,10 +220,10 @@ class cQuadraticScalarBilateralConstraint(cBilateralConstraint):
         _res[:] = self.P_.dot(_x).dot(_x) + self.b_.dot(_x) + self.c_
 
     def diff_1(self, _x, _res):
-        _res[:, :] = (self.P_.T+self.P_).dot(_x) + self.b_
+        _res[:, :] = (self.P_.T + self.P_).dot(_x) + self.b_
 
     def diff_2(self, _idx, _x, _res):
-        _res[:, :] = (self.P_.T+self.P_)
+        _res[:, :] = (self.P_.T + self.P_)
 
     def diff_2_contraction(self, x, lam, res):
         # self.res.fill(0.0)

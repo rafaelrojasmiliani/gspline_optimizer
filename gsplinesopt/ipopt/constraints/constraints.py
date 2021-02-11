@@ -41,15 +41,23 @@ class cBilateralConstraint(cConstraint):
         super(cBilateralConstraint, self).__init__(**kwargs)
         if 'tol' not in kwargs:
             self.tol = 0.0
+            self.lower_bounds_ = -np.zeros((len(self), ))
+            self.upper_bounds_ = np.zeros((len(self), ))
         else:
             self.tol = kwargs['tol']
-        pass
+
+            self.lower_bounds_ = -np.ones((len(self), )) * self.tol * 0.5
+            self.upper_bounds_ = np.ones((len(self), )) * self.tol * 0.5
+        if 'vector_limits_' in kwargs:
+            assert len(kwargs['vector_limits_']) == len(self)
+            self.upper_bounds_ = kwargs['vector_limits_']
+            self.lower_bounds_ = -kwargs['vector_limits_']
 
     def upperBounds(self):
-        return np.ones((len(self), )) * self.tol * 0.5
+        return self.upper_bounds_
 
     def lowerBounds(self):
-        return -np.ones((len(self), )) * self.tol * 0.5
+        return self.lower_bounds_
 
 
 class cUnilateralUpperConstraint(cConstraint):
@@ -60,13 +68,14 @@ class cUnilateralUpperConstraint(cConstraint):
 
     def __init__(self, **kwargs):
         super(cUnilateralUpperConstraint, self).__init__(**kwargs)
-        pass
+        self.lower_bounds_ = -np.ones((len(self), )) * 1.0e20
+        self.upper_bounds_ = np.zeros((len(self), ))
 
     def upperBounds(self):
-        return np.zeros((len(self), ))
+        return self.upper_bounds_
 
     def lowerBounds(self):
-        return -np.ones((len(self), )) * (1.0e20)
+        return self.lower_bounds_
 
 
 class cUnilateralLowerConstraint(cConstraint):
@@ -78,13 +87,14 @@ class cUnilateralLowerConstraint(cConstraint):
 
     def __init__(self, **kwargs):
         super(cUnilateralLowerConstraint, self).__init__(**kwargs)
-        pass
+        self.upper_bounds_ = np.ones((len(self), )) * (1.0e20)
+        self.lower_bounds_ = np.zeros((len(self), ))
 
     def upperBounds(self):
-        return np.ones((len(self), )) * (1.0e20)
+        return self.upper_bounds_
 
     def lowerBounds(self):
-        return np.zeros((len(self), ))
+        return self.lower_bounds_
 
 
 class cPresendenceConstraint(cUnilateralUpperConstraint):
@@ -158,7 +168,7 @@ class cAffineUnilateralLowerConstraint(cUnilateralLowerConstraint):
     """
         Class for a linear bilateral constraint
         as
-            Ax +b = 0
+            0 < Ax +b < inf
     """
 
     def __init__(self, **kwargs):
